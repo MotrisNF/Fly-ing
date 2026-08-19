@@ -2,21 +2,40 @@
 
 from exceptions import ConfigError
 from starter import StartProgram
+from text_printer import Printer
+import signal
 
 
 def main() -> None:
     starter = StartProgram()
     try:
         starter.start_simulation()
+        starter.printer.print_by_letter(
+            f"Opening '{starter.file}'...",
+            0.05,
+            1.0
+            )
+        starter.open_config()
+        print(starter.parser.temp_list)
     except ConfigError as e:
-        print(f"{type(e).__name__}: {e}")
+        starter.printer.print_by_letter(
+            f"{type(e).__name__}: {e}",
+            0.01,
+            0.5
+            )
         exit(1)
-    starter.printer.print_by_letter(f"Opening '{starter.file}'...", 0.05, 1.0)
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\r\033[2K", end="")
-        exit("Don't kill my program...")
+        old_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
+        try:
+            print("\r\033[2K", end="")
+            Printer.print_by_letter("Don't kill my program...",
+                                    0.4,
+                                    0.0)
+            exit(1)
+        finally:
+            signal.signal(signal.SIGINT, old_handler)
