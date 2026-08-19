@@ -1,0 +1,103 @@
+#Simply definition ogf the classes. The practict methods and the practics
+    atributes
+
+
+class StartProgram:
+    printer: Printer
+    parser: Parser
+    file: str
+
+    def __init__(self) -> None: ...
+    def start_simulation(self) -> None: ...
+    def open_config(self) -> None: ...
+
+
+class Parser:
+    config: Optional[MapConfig]
+
+    def __init__(self) -> None: ...
+    def read_file(self, file: TextIO) -> MapConfig: ...
+
+
+class MapConfig:
+    nb_drones: int
+    gates: Gates
+    hubs: dict[str, Hub]
+    connections: list[Connection]
+    min_x: int
+    max_x: int
+    min_y: int
+    max_y: int
+    width: int
+    height: int
+
+
+class Gates:
+    entry: Gate
+    exit: Gate
+
+
+class Gate:
+    x: int
+    y: int
+    color: Optional[str]
+
+
+class Hub:
+    x: int
+    y: int
+    zone: ZoneType
+    max_drones: Optional[int]
+    color: Optional[str]
+
+
+class Connection:
+    pos1: str
+    pos2: str
+    capacity: int
+
+
+#Hopw to "start" a simple "flujo" of the progrtam
+
+
+starter: StartProgram = StartProgram()
+starter.start_simulation()
+starter.open_config()
+
+config: MapConfig = starter.parser.config
+
+nb_drones: int = config.nb_drones
+
+gates: Gates = config.gates
+entry: Gate = config.gates.entry
+entry_x: int = config.gates.entry.x
+entry_y: int = config.gates.entry.y
+entry_color: Optional[str] = config.gates.entry.color
+exit_gate: Gate = config.gates.exit
+exit_x: int = config.gates.exit.x
+exit_y: int = config.gates.exit.y
+exit_color: Optional[str] = config.gates.exit.color
+
+min_x: int = config.min_x
+max_x: int = config.max_x
+min_y: int = config.min_y
+max_y: int = config.max_y
+width: int = config.width
+height: int = config.height
+
+hubs: dict[str, Hub] = config.hubs
+for name, hub in config.hubs.items():
+    zone_name: str = name
+    zone: Hub = hub
+    x: int = zone.x
+    y: int = zone.y
+    zone_type: ZoneType = zone.zone
+    max_drones: Optional[int] = zone.max_drones
+    color: Optional[str] = zone.color
+
+connections: list[Connection] = config.connections
+for connection in config.connections:
+    link: Connection = connection
+    pos1: str = link.pos1
+    pos2: str = link.pos2
+    capacity: int = link.capacity

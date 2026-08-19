@@ -104,12 +104,26 @@ class MapConfig(BaseModel):
         gates: The start and end zones.
         hubs: All zones (including the gates), keyed by name.
         connections: All links between zones.
+        min_x: Smallest x coordinate used by any zone.
+        max_x: Largest x coordinate used by any zone.
+        min_y: Smallest y coordinate used by any zone.
+        max_y: Largest y coordinate used by any zone.
+        width: ``max_x - min_x``, the map's extent along x once
+            shifted so ``min_x`` sits at 0.
+        height: ``max_y - min_y``, the map's extent along y once
+            shifted so ``min_y`` sits at 0.
     """
 
     nb_drones: int
     gates: Gates
     hubs: dict[str, Hub]
     connections: list[Connection]
+    min_x: int
+    max_x: int
+    min_y: int
+    max_y: int
+    width: int
+    height: int
 
     @field_validator("nb_drones")
     @classmethod
@@ -146,6 +160,7 @@ class Parser:
         start_name: Optional[str] = None
         end_name: Optional[str] = None
         seen_connections: set[frozenset[str]] = set()
+        seen_coordinates: dict[tuple[int, int], str] = {}
 
         for line_number, raw_line in enumerate(file, start=1):
             line = raw_line.split("#", 1)[0].strip()
@@ -163,7 +178,11 @@ class Parser:
                         "definition."
                     )
                 start_name = self._parse_hub(
-                    line[len("start_hub:"):], "start", hubs, line_number
+                    line[len("start_hub:"):],
+                    "start",
+                    hubs,
+                    seen_coordinates,
+                    line_number,
                 )
             elif line.startswith("end_hub:"):
                 if end_name is not None:
@@ -172,11 +191,19 @@ class Parser:
                         "definition."
                     )
                 end_name = self._parse_hub(
-                    line[len("end_hub:"):], "end", hubs, line_number
+                    line[len("end_hub:"):],
+                    "end",
+                    hubs,
+                    seen_coordinates,
+                    line_number,
                 )
             elif line.startswith("hub:"):
                 self._parse_hub(
-                    line[len("hub:"):], None, hubs, line_number
+                    line[len("hub:"):],
+                    None,
+                    hubs,
+                    seen_coordinates,
+                    line_number,
                 )
             elif line.startswith("connection:"):
                 self._parse_connection(
@@ -205,6 +232,11 @@ class Parser:
         start_hub = hubs[start_name]
         end_hub = hubs[end_name]
 
+        xs = [x for x, _y in seen_coordinates]
+        ys = [y for _x, y in seen_coordinates]
+        min_x, max_x = min(xs), max(xs)
+        min_y, max_y = min(ys), max(ys)
+
         try:
             self.config = MapConfig(
                 nb_drones=nb_drones,
@@ -216,6 +248,12 @@ class Parser:
                 ),
                 hubs=hubs,
                 connections=connections,
+                min_x=min_x,
+                max_x=max_x,
+                min_y=min_y,
+                max_y=max_y,
+                width=max_x - min_x,
+                height=max_y - min_y,
             )
         except ValidationError as e:
             raise FileError(str(e)) from e
@@ -250,6 +288,7 @@ class Parser:
         remainder: str,
         forced_zone: Optional[Literal["start", "end"]],
         hubs: dict[str, Hub],
+        seen_coordinates: dict[tuple[int, int], str],
         line_number: int,
     ) -> str:
         """Parse a ``hub:``/``start_hub:``/``end_hub:`` line body.
@@ -259,14 +298,20 @@ class Parser:
             forced_zone: ``"start"``/``"end"`` for a gate line, or
                 ``None`` for a regular ``hub:`` line.
             hubs: Zones parsed so far; the new hub is added to it.
+            seen_coordinates: ``(x, y)`` positions already used by an
+                earlier zone, mapped to that zone's name. Not
+                required by the subject, but two zones sharing a
+                position doesn't make physical sense, so it's
+                rejected too.
             line_number: 1-based line number, for error messages.
 
         Returns:
             The name of the newly parsed zone.
 
         Raises:
-            FileError: If the line is malformed or its metadata is
-                invalid.
+            FileError: If the line is malformed, its metadata is
+                invalid, or its coordinates are already used by
+                another zone.
         """
         body, meta = self._split_metadata_block(remainder, line_number)
 
@@ -288,6 +333,12 @@ class Parser:
             )
         x = self._parse_int(x_raw, "x", line_number)
         y = self._parse_int(y_raw, "y", line_number)
+        if (x, y) in seen_coordinates:
+            raise FileError(
+                f"Line {line_number}: zone '{name}' has the same "
+                f"coordinates ({x}, {y}) as zone "
+                f"'{seen_coordinates[(x, y)]}'."
+            )
 
         metadata = self._parse_metadata(meta, _HUB_METADATA_KEYS, line_number)
         zone = self._parse_zone_type(
@@ -314,6 +365,7 @@ class Parser:
             raise FileError(f"Line {line_number}: {e}") from e
 
         hubs[name] = hub
+        seen_coordinates[(x, y)] = name
         return name
 
     def _parse_connection(

@@ -49,7 +49,20 @@ class StartProgram:
         """Read and parse the previously validated map file.
 
         Raises:
-            FileError: If the map file's contents are malformed.
+            FileError: If the file can no longer be opened, isn't
+                valid UTF-8 text, or its contents are malformed.
         """
-        with open(self.file) as file:
-            self.parser.read_file(file)
+        try:
+            with open(self.file) as file:
+                self.parser.read_file(file)
+        except FileNotFoundError as e:
+            raise FileError(f"The '{self.file}' file do not exist.") from e
+        except UnicodeDecodeError as e:
+            raise FileError(
+                f"The '{self.file}' file is not a valid UTF-8 text "
+                "file."
+            ) from e
+        except OSError as e:
+            raise FileError(
+                f"The '{self.file}' file can't be opened"
+            ) from e
