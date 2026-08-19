@@ -18,7 +18,7 @@ class Printer:
 
     @staticmethod
     def erase_line(times: int = 0) -> None:
-        for _ in range(0, times + 1):
+        for _ in range(0, times):
             print(end="\033[2K\033[A\r")
             Printer.print_by_letter(
                 "                                                     ",
