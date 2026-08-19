@@ -1,16 +1,25 @@
+"""Bootstraps the simulation: greets the user and loads the map file."""
+
 from text_printer import Printer
 from exceptions import FileError
 from parser import Parser
-from typing import TextIO
 
 
 class StartProgram:
+    """Coordinates the welcome prompt and map file loading."""
+
     def __init__(self) -> None:
         self.printer = Printer()
         self.parser = Parser()
         self.file: str = ""
 
     def start_simulation(self) -> None:
+        """Greet the user, ask for a map filename, and check it opens.
+
+        Raises:
+            FileError: If no filename is entered, or the file cannot
+                be opened.
+        """
         self.printer.print_by_letter(
                                     "Welcome to the dron simulation...",
                                     0.02,
@@ -37,5 +46,10 @@ class StartProgram:
         self.printer.erase_line(3)
 
     def open_config(self) -> None:
+        """Read and parse the previously validated map file.
+
+        Raises:
+            FileError: If the map file's contents are malformed.
+        """
         with open(self.file) as file:
             self.parser.read_file(file)

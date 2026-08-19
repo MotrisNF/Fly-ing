@@ -1,4 +1,4 @@
-# import pydantic
+"""Entry point: runs the simulation and handles Ctrl+C gracefully."""
 
 from exceptions import ConfigError
 from starter import StartProgram
@@ -7,6 +7,7 @@ import signal
 
 
 def main() -> None:
+    """Run the welcome flow, load the map, and report the outcome."""
     starter = StartProgram()
     try:
         starter.start_simulation()
@@ -16,7 +17,7 @@ def main() -> None:
             1.0
             )
         starter.open_config()
-        print(starter.parser.temp_list)
+        print(starter.parser.config)
     except ConfigError as e:
         starter.printer.print_by_letter(
             f"{type(e).__name__}: {e}",

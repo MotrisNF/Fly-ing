@@ -1,8 +1,15 @@
+"""Custom exception hierarchy for configuration and file errors."""
+
+
 class ConfigError(Exception):
+    """Base exception for any invalid simulation configuration."""
+
     def __init__(self, msg: str = "Default ConfigError."):
         super().__init__(msg)
 
 
 class FileError(ConfigError):
+    """Raised when the map file is missing, unreadable, or malformed."""
+
     def __init__(self, msg: str = "Default FileError.") -> None:
         super().__init__(msg)
