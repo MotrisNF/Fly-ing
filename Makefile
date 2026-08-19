@@ -23,14 +23,17 @@ destroy:
 
 re-install: destroy install
 
-lint:
+clean:
+	rm -rf .mypy_cache && rm -rf __pycache__
+
+lint: install
 	if $(PYTHON) -m flake8 .; then \
 		echo "Flake8 without issues"; \
 	fi; \
 	$(PYTHON) -m $(MYPY) .; \
 	true
 
-lint-strict:
+lint-strict: install
 	if $(PYTHON) -m flake8 .; then \
 		echo "Flake8 without issues"; \
 	fi; \

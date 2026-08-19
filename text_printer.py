@@ -9,12 +9,15 @@ class Printer:
                         time_to_sleep: float
                         ) -> None:
         temp_text: str = ""
+        print("\033[?25l", end="")
         for leter in text:
             temp_text = temp_text + leter
             print(temp_text, end="\r")
             time.sleep(speed)
-        print(temp_text)
+        print(temp_text, end="")
+        print("\033[?25h", end="")
         time.sleep(time_to_sleep)
+        print()
 
     @staticmethod
     def erase_line(times: int = 0) -> None:
