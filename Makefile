@@ -1,7 +1,12 @@
 SHELL := /bin/bash
+.SILENT:
 ENV_SOURCE=.venv
 PYTHON=$(ENV_SOURCE)/bin/python
 PIP=$(ENV_SOURCE)/bin/pip
+MYPY=mypy --warn-return-any --warn-unused-ignores \
+	--ignore-missing-imports \
+	--disallow-untyped-defs \
+	--check-untyped-defs
 
 
 env:
@@ -16,4 +21,20 @@ run: install
 destroy:
 	rm -rf $(ENV_SOURCE)
 
-.PHONY: env install run destroy
+re-install: destroy install
+
+lint:
+	if $(PYTHON) -m flake8 .; then \
+		echo "Flake8 without issues"; \
+	fi; \
+	$(PYTHON) -m $(MYPY) .; \
+	true
+
+lint-strict:
+	if $(PYTHON) -m flake8 .; then \
+		echo "Flake8 without issues"; \
+	fi; \
+	$(PYTHON) -m $(MYPY) --strict .; \
+	true
+
+.PHONY: env install run destroy re-install lint lint-strict
