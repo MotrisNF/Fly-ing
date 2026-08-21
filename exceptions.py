@@ -13,3 +13,9 @@ class FileError(ConfigError):
 
     def __init__(self, msg: str = "Default FileError.") -> None:
         super().__init__(msg)
+
+
+class PathError(ConfigError):
+
+    def __init__(self, msg: str = "Default PathError.") -> None:
+        super().__init__(msg)

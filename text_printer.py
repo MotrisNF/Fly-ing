@@ -13,7 +13,8 @@ class Printer:
     def print_by_letter(
                         text: str,
                         speed: float,
-                        time_to_sleep: float
+                        time_to_sleep: float,
+                        color: str = "\033[0m"
                         ) -> None:
         """Print text one letter at a time, hiding cursor and echo.
 
@@ -41,10 +42,10 @@ class Printer:
             print("\033[?25l", end="")
             for leter in text:
                 temp_text = temp_text + leter
-                print(temp_text, end="\r")
+                print(color + temp_text, end="\r")
                 time.sleep(speed)
             print(temp_text, end="")
-            print("\033[?25h", end="")
+            print("\033[?25h\033[0m", end="")
             time.sleep(time_to_sleep)
             print()
         finally:

@@ -21,14 +21,23 @@ class StartProgram:
                 be opened.
         """
         self.printer.print_by_letter(
+            "································",
+            0.1,
+            0.0,
+            "\033[92m"
+        )
+        self.printer.erase_line(1)
+        self.printer.print_by_letter(
                                     "Welcome to the dron simulation...",
                                     0.02,
-                                    1.0
+                                    1.0,
+                                    "\033[92m"
                                     )
         self.printer.print_by_letter(
                                     "Introduce the name of the map: ",
                                     0.02,
-                                    0.0
+                                    0.0,
+                                    "\033[92m"
                                     )
         self.file = input().strip()
         if self.file == "":

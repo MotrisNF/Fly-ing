@@ -10,13 +10,13 @@ MYPY=mypy --warn-return-any --warn-unused-ignores \
 
 
 env:
-	python3 -m venv $(ENV_SOURCE)
+	@python3 -m venv $(ENV_SOURCE)
 
 install: env
-	$(PIP) install -r requirements.txt
+	@$(PIP) install -r requirements.txt > /dev/null
 
 run: install
-	$(PYTHON) main.py
+	@$(PYTHON) main.py
 
 destroy:
 	rm -rf $(ENV_SOURCE)
