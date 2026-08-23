@@ -47,6 +47,7 @@ class Printer:
             print(temp_text, end="")
             print("\033[?25h\033[0m", end="")
             time.sleep(time_to_sleep)
+
             print()
         finally:
             if is_tty:

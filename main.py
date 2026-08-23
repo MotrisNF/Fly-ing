@@ -1,11 +1,12 @@
 """Entry point: runs the simulation and handles Ctrl+C gracefully."""
 
-from exceptions import ConfigError
+from exceptions import ConfigError, PathError
 from starter import StartProgram
 from text_printer import Printer
 from initiate_simulation import Initiator
 
 import signal
+import sys
 
 
 def main() -> None:
@@ -21,12 +22,15 @@ def main() -> None:
             )
         starter.open_config()
         initialicer = Initiator(starter.parser.config)
+        if not initialicer.find_path_to_end():
+            raise PathError("There is not a posible way to the end.")
         initialicer.printer.print_by_letter(
-            "Everything it's ok until here",
-            0.05,
-            0.0
+            "Found a posible way on the map recived.",
+            0.02,
+            1,
+            "\033[92m"
         )
-        initialicer.fill_hub_connections()
+        initialicer.printer.erase_line(4)
     except ConfigError as e:
         starter.printer.print_by_letter(
             f"{type(e).__name__}: {e}",
@@ -34,7 +38,7 @@ def main() -> None:
             0.5,
             "\033[91m"
             )
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
@@ -49,6 +53,13 @@ if __name__ == "__main__":
                                     0.0,
                                     "\033[91m"
                                     )
-            exit(0)
+            sys.exit(0)
         finally:
             signal.signal(signal.SIGINT, old_handler)
+    finally:
+        printer = Printer()
+        printer.print_by_letter(
+            "End of the simulation...",
+            0.02,
+            0.0
+        )

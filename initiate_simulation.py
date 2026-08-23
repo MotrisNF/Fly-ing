@@ -16,16 +16,44 @@ class Initiator:
         )
 
     def fill_hub_connections(self) -> None:
+        if self.config is None:
+            raise PathError("Sonthing was wrong")
         for key, hub in self.config.hubs.items():
             for connection in self.config.connections:
                 if connection.pos1 == key:
                     hub.connection.append(connection)
                 elif connection.pos2 == key:
                     hub.connection.append(connection)
-        print(self.config.hubs)
 
-    def validate_path_to_finish(self) -> None:
+    def find_path_to_end(self) -> bool:
         if self.config is None:
             raise PathError("The config is not loaded.")
-        actual_hub = self.config.hubs.get(self.config.gates.entry.name)
-        print(actual_hub)
+        self.fill_hub_connections()
+        self.printer.print_by_letter(
+            "Serching a valid way to the end...",
+            0.02,
+            2,
+            "\033[92m"
+        )
+        start = self.config.gates.entry.name
+        end = self.config.gates.exit.name
+        visited: set[str] = set()
+        to_visit = [start]
+        while to_visit:
+            current = to_visit.pop()
+            if current == end:
+                return True
+            if current in visited:
+                continue
+            visited.add(current)
+            hub = self.config.hubs.get(current)
+            if hub is None:
+                continue
+            for connection in hub.connection:
+                if connection.pos1 == current:
+                    neighbor = connection.pos2
+                else:
+                    neighbor = connection.pos1
+                if neighbor not in visited:
+                    to_visit.append(neighbor)
+        return False
