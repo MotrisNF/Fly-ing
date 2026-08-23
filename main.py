@@ -31,6 +31,25 @@ def main() -> None:
             "\033[92m"
         )
         initialicer.printer.erase_line(4)
+        initialicer.printer.print_by_letter(
+            "Starting the drone moves...",
+            0.05,
+            2,
+            "\033[92m"
+        )
+        initialicer.run_simulation()
+        for step in initialicer.turns:
+            initialicer.printer.print_by_letter(
+                step,
+                0.02,
+                0.1
+            )
+        initialicer.printer.print_by_letter(
+            "Counying the movements...",
+            0.05,
+            2
+        )
+        
     except ConfigError as e:
         starter.printer.print_by_letter(
             f"{type(e).__name__}: {e}",
