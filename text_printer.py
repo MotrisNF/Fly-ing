@@ -30,10 +30,10 @@ class Printer:
             time_to_sleep: Seconds to pause after the full text is
                 shown, before returning.
         """
-        fd = sys.stdin.fileno()
-        is_tty = os.isatty(fd)
         if testing:
             return
+        fd = sys.stdin.fileno()
+        is_tty = os.isatty(fd)
         old_settings = None
         if is_tty:
             old_settings = termios.tcgetattr(fd)

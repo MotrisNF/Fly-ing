@@ -3,7 +3,15 @@ from exceptions import PathError
 from constants import (
     COLORS, ZONE_COLORS, DESKTOP_OFFSET, MARGIN_X, MARGIN_Y, MAX_GRID,
     SIDEBAR_RATIO, TURN_DURATION_FRAMES, TURN_PAUSE_FRAMES,
-    START_DELAY_FRAMES
+    START_DELAY_FRAMES, FRAME_RATE, NODE_SPRITE_SCALE, DRONE_SPRITE_SCALE,
+    MOON_SIZE_DIVISOR, CONNECTION_LINE_WIDTH, CONNECTION_LINE_INNER_WIDTH,
+    BADGE_BORDER_WIDTH, CAPACITY_BADGE_RADIUS_FLOOR, CAPACITY_BADGE_FONT_FLOOR,
+    CAPACITY_BADGE_GRID_DIVISOR, CAPACITY_BADGE_SIZE_CAP_DIVISOR,
+    CAPACITY_BADGE_RADIUS_SIZE_CAP_MIN, CAPACITY_BADGE_FONT_SIZE_CAP_MIN,
+    DRONE_BADGE_RADIUS_FLOOR, DRONE_BADGE_FONT_FLOOR, DRONE_BADGE_GRID_DIVISOR,
+    DRONE_BADGE_SIZE_CAP_DIVISOR, DRONE_BADGE_RADIUS_SIZE_CAP_MIN,
+    DRONE_BADGE_FONT_SIZE_CAP_MIN, TURN_LABEL_FONT_FLOOR,
+    TURN_LABEL_SIDEBAR_DIVISOR, TURN_LABEL_MARGIN
 )
 
 import math
@@ -11,7 +19,17 @@ import pygame
 
 
 class Pyshow():
+    """Renders the map and animates the simulated drone fleet."""
+
     def __init__(self, initiator: Initiator) -> None:
+        """Store the finished simulation to render.
+
+        Args:
+            initiator: A simulation that has already been run.
+
+        Raises:
+            PathError: If the config isn't loaded.
+        """
         if initiator.config is None:
             raise PathError("The config is not loaded.")
         self._initiator = initiator
@@ -19,7 +37,7 @@ class Pyshow():
         self._dimentions: tuple[int, int] = (0, 0)
         self._running: bool = True
         self._clock = pygame.time.Clock()
-        self._ticks: float = 30.0
+        self._ticks: float = FRAME_RATE
         self._grid: int = 0
         self._spacing_x: float = 0.0
         self._spacing_y: float = 0.0
@@ -29,6 +47,7 @@ class Pyshow():
         self._frame_count: int = 0
 
     def _to_screen(self, x: int, y: int) -> tuple[int, int]:
+        """Convert a hub's map coordinates to a screen pixel position."""
         col = x - self._c.min_x
         row = y - self._c.min_y
         return (
@@ -39,6 +58,20 @@ class Pyshow():
     def _interpolate(
         self, waypoints: list[tuple[int, int, int]]
     ) -> tuple[tuple[int, int], tuple[int, int]]:
+        """Find a drone's current screen position and facing direction.
+
+        Locates which pair of waypoints brackets the current frame
+        and linearly interpolates between them, so a move animates
+        smoothly across the turns it takes to complete.
+
+        Args:
+            waypoints: A drone's ``(turn, x, y)`` rest positions, in
+                order.
+
+        Returns:
+            The interpolated screen position, and the direction of
+            travel for that segment.
+        """
         for i in range(len(waypoints) - 1):
             turn0, x0, y0 = waypoints[i]
             turn1, x1, y1 = waypoints[i + 1]
@@ -65,6 +98,12 @@ class Pyshow():
     def _last_direction(
         self, waypoints: list[tuple[int, int, int]], i: int
     ) -> tuple[int, int]:
+        """Find the last real movement direction up to waypoint ``i``.
+
+        Used while a drone is stationary (arrived or waiting) so its
+        sprite keeps facing the way it was last moving, instead of
+        resetting to a default orientation.
+        """
         for k in range(i, -1, -1):
             x0, y0 = waypoints[k][1], waypoints[k][2]
             x1, y1 = waypoints[k + 1][1], waypoints[k + 1][2]
@@ -73,6 +112,7 @@ class Pyshow():
         return (0, -1)
 
     def start(self) -> None:
+        """Open the window, draw the static map, and animate the fleet."""
         pygame.init()
 
         desktop = pygame.display.Info()
@@ -96,7 +136,7 @@ class Pyshow():
                 back_ground.blit(star_tile, (tile_x, tile_y))
 
         moon_sprite = pygame.image.load("assets/moon.png").convert_alpha()
-        moon_size = min(map_width, map_height) // 4
+        moon_size = min(map_width, map_height) // MOON_SIZE_DIVISOR
         moon_scaled = pygame.transform.scale(
             moon_sprite, (moon_size, moon_size)
         )
@@ -134,23 +174,40 @@ class Pyshow():
         self._grid = int(min(grid_candidates))
 
         node_sprite = pygame.image.load("assets/node.png").convert_alpha()
-        size = int(self._grid * 0.7)
+        size = int(self._grid * NODE_SPRITE_SCALE)
         scaled_node_sprite = pygame.transform.scale(node_sprite, (size, size))
 
         for name, hub in self._c.hubs.items():
             self._centers[name] = self._to_screen(hub.x, hub.y)
 
         capacity_radius = min(
-            max(6, self._grid // 8), max(2, size // 3)
+            max(
+                CAPACITY_BADGE_RADIUS_FLOOR,
+                self._grid // CAPACITY_BADGE_GRID_DIVISOR
+            ),
+            max(
+                CAPACITY_BADGE_RADIUS_SIZE_CAP_MIN,
+                size // CAPACITY_BADGE_SIZE_CAP_DIVISOR
+            )
         )
         capacity_font_px = min(
-            max(9, self._grid // 8), max(6, size // 3)
+            max(
+                CAPACITY_BADGE_FONT_FLOOR,
+                self._grid // CAPACITY_BADGE_GRID_DIVISOR
+            ),
+            max(
+                CAPACITY_BADGE_FONT_SIZE_CAP_MIN,
+                size // CAPACITY_BADGE_SIZE_CAP_DIVISOR
+            )
         )
         capacity_font = pygame.font.SysFont(None, capacity_font_px)
         for connection in self._c.connections:
             pos1 = self._centers[connection.pos1]
             pos2 = self._centers[connection.pos2]
-            pygame.draw.line(back_ground, COLORS["BLACK"], pos1, pos2, 6)
+            pygame.draw.line(
+                back_ground, COLORS["BLACK"], pos1, pos2,
+                CONNECTION_LINE_WIDTH
+            )
 
             midpoint = (
                 (pos1[0] + pos2[0]) // 2,
@@ -160,9 +217,13 @@ class Pyshow():
                 back_ground, COLORS["WHITE"], midpoint, capacity_radius
             )
             pygame.draw.circle(
-                back_ground, COLORS["BLACK"], midpoint, capacity_radius, 2
+                back_ground, COLORS["BLACK"], midpoint, capacity_radius,
+                BADGE_BORDER_WIDTH
             )
-            pygame.draw.line(back_ground, COLORS["WHITE"], pos1, pos2, 2)
+            pygame.draw.line(
+                back_ground, COLORS["WHITE"], pos1, pos2,
+                CONNECTION_LINE_INNER_WIDTH
+            )
 
             capacity_label = capacity_font.render(
                 str(connection.capacity), False, COLORS["BLACK"]
@@ -197,7 +258,7 @@ class Pyshow():
                 )
                 pygame.draw.circle(
                     back_ground, COLORS["BLACK"], badge_center,
-                    capacity_radius, 2
+                    capacity_radius, BADGE_BORDER_WIDTH
                 )
                 capacity_label = capacity_font.render(
                     str(hub.max_drones), False, COLORS["BLACK"]
@@ -206,15 +267,29 @@ class Pyshow():
                 back_ground.blit(capacity_label, capacity_rect)
 
         drone_sprite = pygame.image.load("assets/drone.png").convert_alpha()
-        drone_size = int(self._grid * 0.55)
+        drone_size = int(self._grid * DRONE_SPRITE_SCALE)
         scaled_drone_sprite = pygame.transform.scale(
             drone_sprite, (drone_size, drone_size)
         )
         drone_badge_radius = min(
-            max(6, self._grid // 10), max(2, drone_size // 3)
+            max(
+                DRONE_BADGE_RADIUS_FLOOR,
+                self._grid // DRONE_BADGE_GRID_DIVISOR
+            ),
+            max(
+                DRONE_BADGE_RADIUS_SIZE_CAP_MIN,
+                drone_size // DRONE_BADGE_SIZE_CAP_DIVISOR
+            )
         )
         drone_badge_font_px = min(
-            max(9, self._grid // 10), max(6, drone_size // 3)
+            max(
+                DRONE_BADGE_FONT_FLOOR,
+                self._grid // DRONE_BADGE_GRID_DIVISOR
+            ),
+            max(
+                DRONE_BADGE_FONT_SIZE_CAP_MIN,
+                drone_size // DRONE_BADGE_SIZE_CAP_DIVISOR
+            )
         )
         drone_badge_font = pygame.font.SysFont(None, drone_badge_font_px)
 
@@ -236,7 +311,13 @@ class Pyshow():
                     (turn_index, sx, sy)
                 )
 
-        turn_font = pygame.font.SysFont(None, max(24, sidebar_width // 12))
+        turn_font = pygame.font.SysFont(
+            None,
+            max(
+                TURN_LABEL_FONT_FLOOR,
+                sidebar_width // TURN_LABEL_SIDEBAR_DIVISOR
+            )
+        )
         loop_frame = 0
 
         while self._running:
@@ -277,7 +358,7 @@ class Pyshow():
                 )
                 pygame.draw.circle(
                     screen, COLORS["BLACK"], drone_pos,
-                    drone_badge_radius, 2
+                    drone_badge_radius, BADGE_BORDER_WIDTH
                 )
                 drone_label = drone_badge_font.render(
                     str(count), False, COLORS["BLACK"]
@@ -289,7 +370,9 @@ class Pyshow():
                 f"Turno {min(elapsed_turns, total_turns)}/{total_turns}",
                 False, COLORS["WHITE"]
             )
-            screen.blit(turn_label, (map_width + 20, 20))
+            screen.blit(
+                turn_label, (map_width + TURN_LABEL_MARGIN, TURN_LABEL_MARGIN)
+            )
 
             pygame.display.flip()
         pygame.quit()
