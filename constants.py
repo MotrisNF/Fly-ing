@@ -19,6 +19,9 @@ _CONNECTION_METADATA_KEYS = {"max_link_capacity"}
 """Metadata keys accepted inside a ``connection:`` line's ``[...]`` block."""
 
 TESTING = True
+"""Passed to ``Printer.print_by_letter`` to skip the letter-by-letter
+animation and terminal echo handling, both incompatible with pytest's
+captured stdin."""
 
 COLORS = {
     "GREEN": (124, 252, 0),
@@ -32,6 +35,7 @@ COLORS = {
     "GRAY": (128, 128, 128),
     "DARK_BLUE": (0, 0, 100),
 }
+"""RGB palette shared by sprites, badges and zone coloring."""
 
 ZONE_COLORS: dict[ZoneType, tuple[int, int, int]] = {
     "normal": COLORS["WHITE"],
@@ -41,66 +45,115 @@ ZONE_COLORS: dict[ZoneType, tuple[int, int, int]] = {
     "start": COLORS["CYAN"],
     "end": COLORS["MAGENTA"],
 }
+"""Fill color drawn for each zone type."""
 
 DESKTOP_OFFSET = 100
+"""Pixels subtracted from the desktop resolution when sizing the window."""
+
 MARGIN_X = 60
+"""Horizontal padding, in pixels, around the map grid."""
+
 MARGIN_Y = 200
+"""Vertical padding, in pixels, around the map grid."""
+
 MAX_GRID = 140
+"""Largest cell size, in pixels, a map grid is ever drawn at."""
+
 SIDEBAR_RATIO = 1 / 3
+"""Fraction of the window width reserved for the sidebar panel."""
+
 TURN_DURATION_FRAMES = 45
+"""Frames a single simulated turn takes to animate, pause included."""
+
 TURN_PAUSE_FRAMES = 8
+"""Frames a drone holds still at a hub before the next turn starts."""
+
 START_DELAY_FRAMES = 60
+"""Frames the animation waits before the first turn begins."""
+
 FRAME_RATE = 30.0
+"""Target frames per second for the pygame window."""
 
-# How big the node/drone sprites are drawn, as a fraction of the grid
-# cell size.
 NODE_SPRITE_SCALE = 0.7
+"""Node sprite size, as a fraction of the grid cell size."""
+
 DRONE_SPRITE_SCALE = 0.55
+"""Drone sprite size, as a fraction of the grid cell size."""
 
-# The moon's diameter is the shorter map dimension divided by this.
 MOON_SIZE_DIVISOR = 4
+"""The moon's diameter is the shorter map dimension divided by this."""
 
-# Connection lines: a thicker black line first, then a thinner white
-# line on top, giving the outlined look.
 CONNECTION_LINE_WIDTH = 6
+"""Width of the black outline drawn under each connection line."""
+
 CONNECTION_LINE_INNER_WIDTH = 2
+"""Width of the white line drawn on top, giving the outlined look."""
 
-# Shared outline thickness for every white-circle badge (connection
-# capacity, node capacity, drone count).
 BADGE_BORDER_WIDTH = 2
+"""Shared outline thickness for every white-circle badge."""
 
-# Connection/node capacity badges: radius and font size are
-# grid-proportional, floored so they stay legible, and capped so they
-# never outgrow the node they sit on.
 CAPACITY_BADGE_RADIUS_FLOOR = 6
+"""Smallest radius a connection/node capacity badge is ever drawn at."""
+
 CAPACITY_BADGE_FONT_FLOOR = 9
+"""Smallest font size a connection/node capacity badge ever uses."""
+
 CAPACITY_BADGE_GRID_DIVISOR = 8
+"""Divides the grid cell size to get the badge's proportional radius."""
+
 CAPACITY_BADGE_SIZE_CAP_DIVISOR = 3
+"""Divides the node sprite size to cap how large the badge can grow."""
+
 CAPACITY_BADGE_RADIUS_SIZE_CAP_MIN = 2
+"""Margin kept clear when capping the badge radius to the node size."""
+
 CAPACITY_BADGE_FONT_SIZE_CAP_MIN = 6
+"""Margin kept clear when capping the badge font to the node size."""
 
-# Same idea for the drone count badge, sized off the (smaller) drone
-# sprite instead of the node sprite.
 DRONE_BADGE_RADIUS_FLOOR = 6
+"""Smallest radius the drone count badge is ever drawn at."""
+
 DRONE_BADGE_FONT_FLOOR = 9
+"""Smallest font size the drone count badge ever uses."""
+
 DRONE_BADGE_GRID_DIVISOR = 10
+"""Divides the grid cell size to get the badge's proportional radius."""
+
 DRONE_BADGE_SIZE_CAP_DIVISOR = 3
+"""Divides the drone sprite size to cap how large the badge can grow."""
+
 DRONE_BADGE_RADIUS_SIZE_CAP_MIN = 2
+"""Margin kept clear when capping the badge radius to the drone size."""
+
 DRONE_BADGE_FONT_SIZE_CAP_MIN = 6
+"""Margin kept clear when capping the badge font to the drone size."""
 
-# Turn counter label, top-left of the sidebar.
 TURN_LABEL_FONT_FLOOR = 24
+"""Smallest font size the turn counter label ever uses."""
+
 TURN_LABEL_SIDEBAR_DIVISOR = 12
+"""Divides the sidebar width to get the label's proportional font size."""
+
 TURN_LABEL_MARGIN = 20
+"""Pixels between the turn counter label and the sidebar's edges."""
 
-# Real per-turn cost (in turns) of moving into a normal/priority vs.
-# a restricted hub; see VII.3 in the subject.
 NORMAL_ZONE_TURN_COST = 1
-RESTRICTED_ZONE_TURN_COST = 2
+"""Turns spent crossing a normal or priority hub; see VII.3."""
 
-# Route planning (Router, in routing.py).
+RESTRICTED_ZONE_TURN_COST = 2
+"""Turns spent crossing a restricted hub; see VII.3."""
+
 MAX_CANDIDATE_PATHS = 8
+"""Most alternate routes Router keeps per drone during route planning."""
+
 PATH_COST_CEILING_RATIO = 3.0
+"""A candidate route is dropped once it costs this many times the best."""
+
 PRIORITY_BIAS = 1e-3
+"""Tiny weight discount making Dijkstra prefer priority hubs on ties."""
+
 COMPLEXITY_THRESHOLD = 20.0
+"""Bottleneck severity above which a map is routed by the advanced planner."""
+
 REFINE_TRIAL_BUDGET = 400
+"""Local-search trials refine_routes runs before giving up on improving."""
