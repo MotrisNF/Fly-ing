@@ -4,6 +4,8 @@ from exceptions import ConfigError, PathError
 from starter import StartProgram
 from text_printer import Printer
 from initiate_simulation import Initiator
+from constants import TESTING
+from show_simulation import Pyshow
 
 import signal
 import sys
@@ -18,7 +20,8 @@ def main() -> None:
             f"Opening '{starter.file}'...",
             0.05,
             1.0,
-            "\033[92m"
+            "\033[92m",
+            TESTING
             )
         starter.open_config()
         initialicer = Initiator(starter.parser.config)
@@ -28,28 +31,37 @@ def main() -> None:
             "Found a posible way on the map recived.",
             0.02,
             1,
-            "\033[92m"
+            "\033[92m",
+            TESTING
         )
-        initialicer.printer.erase_line(4)
+        initialicer.printer.erase_line(4, TESTING)
         initialicer.printer.print_by_letter(
             "Starting the drone moves...",
             0.05,
             2,
-            "\033[92m"
+            "\033[92m",
+            TESTING
         )
         initialicer.run_simulation()
         for step in initialicer.turns:
             initialicer.printer.print_by_letter(
                 step,
-                0.02,
-                0.1
+                0.001,
+                0.01
             )
         initialicer.printer.print_by_letter(
-            "Counying the movements...",
+            "Counting the movements...",
             0.05,
+            1.5,
+            testing=TESTING
+        )
+        total_moves: int = len(initialicer.turns)
+        initialicer.printer.print_by_letter(
+            f"The map was resolved in {total_moves} moves",
+            0.02,
             2
         )
-        
+
     except ConfigError as e:
         starter.printer.print_by_letter(
             f"{type(e).__name__}: {e}",
@@ -62,7 +74,17 @@ def main() -> None:
 
 if __name__ == "__main__":
     try:
-        main()
+        #main()
+        starter = StartProgram()
+        starter.start_simulation()
+        starter.open_config()
+        initialicer = Initiator(starter.parser.config)
+        if not initialicer.find_path_to_end():
+            raise PathError("There is not a posible way to the end.")
+        initialicer.run_simulation()
+        show: Pyshow = Pyshow(starter.parser.config)
+        show.start(initialicer)
+
     except KeyboardInterrupt:
         old_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
         try:
@@ -70,7 +92,8 @@ if __name__ == "__main__":
             Printer.print_by_letter("Don't kill my f****** program...",
                                     0.4,
                                     0.0,
-                                    "\033[91m"
+                                    "\033[91m",
+                                    TESTING
                                     )
             sys.exit(0)
         finally:

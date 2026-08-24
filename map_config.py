@@ -1,3 +1,5 @@
+"""Pydantic models forming the validated representation of a map."""
+
 from pydantic import BaseModel, field_validator
 from typing import Optional
 

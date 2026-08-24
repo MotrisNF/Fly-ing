@@ -16,6 +16,7 @@ class FileError(ConfigError):
 
 
 class PathError(ConfigError):
+    """Raised when no valid drone route exists between the gates."""
 
     def __init__(self, msg: str = "Default PathError.") -> None:
         super().__init__(msg)

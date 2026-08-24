@@ -18,6 +18,7 @@ class Parser:
     """Reads a map file and turns it into a validated MapConfig."""
 
     def __init__(self) -> None:
+        """Create a parser with no map loaded yet."""
         self.config: Optional[MapConfig] = None
 
     def read_file(self, file: TextIO) -> MapConfig:

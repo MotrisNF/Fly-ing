@@ -14,7 +14,8 @@ class Printer:
                         text: str,
                         speed: float,
                         time_to_sleep: float,
-                        color: str = "\033[0m"
+                        color: str = "\033[0m",
+                        testing: bool = False
                         ) -> None:
         """Print text one letter at a time, hiding cursor and echo.
 
@@ -31,6 +32,8 @@ class Printer:
         """
         fd = sys.stdin.fileno()
         is_tty = os.isatty(fd)
+        if testing:
+            return
         old_settings = None
         if is_tty:
             old_settings = termios.tcgetattr(fd)
@@ -56,18 +59,23 @@ class Printer:
                 termios.tcsetattr(fd, termios.TCSANOW, old_settings)
 
     @staticmethod
-    def erase_line(times: int = 0) -> None:
+    def erase_line(
+                    times: int = 0,
+                    testing: bool = False
+                   ) -> None:
         """Erase the given number of previously printed lines.
 
         Args:
             times: How many lines, counting upward from the cursor,
                 to clear.
         """
+        if testing:
+            return
         for _ in range(0, times):
             print(end="\033[2K\033[A\r")
             Printer.print_by_letter(
-                "                                                     ",
-                0.025,
+                "                                                           ",
+                0.015,
                 0
             )
             print("\033[2K\r\033[A", end="")

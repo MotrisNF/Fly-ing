@@ -1,7 +1,38 @@
-from typing import Optional
+"""State machine for a single drone travelling across the map."""
+
+from typing import NamedTuple, Optional
 
 from map_config import MapConfig
-from constants import DroneStatus
+from constants import DroneStatus, ZoneType
+
+
+class DronePosition(NamedTuple):
+    """One drone's on-screen position at a given simulation turn.
+
+    Attributes:
+        drone_id: The drone this position belongs to.
+        x: X coordinate to draw the drone at.
+        y: Y coordinate to draw the drone at.
+        hub: Name of the hub these coordinates belong to.
+        zone: That hub's zone type (``"restricted"``, ``"blocked"``,
+            ``"normal"``, ``"priority"``, ``"start"`` or ``"end"``) —
+            check this instead of guessing from ``in_transit`` alone,
+            since it names the actual hub involved.
+        in_transit: True while the drone is mid-flight over a
+            connection into ``hub``, in which case ``(x, y)`` is
+            already that destination's position (the drone hasn't
+            physically arrived yet). Callers that want to animate the
+            crossing instead of snapping to the destination can use
+            this flag to interpolate from the previous turn's
+            position.
+    """
+
+    drone_id: int
+    x: int
+    y: int
+    hub: str
+    zone: ZoneType
+    in_transit: bool
 
 
 class Drone:
@@ -24,6 +55,7 @@ class Drone:
                 and exit hub names.
         """
         self._id: int = id
+        self._config: MapConfig = config
         self._status: DroneStatus = "waiting"
         self._total_moves: int = 0
         self._current_hub: str = config.gates.entry.name
@@ -43,6 +75,34 @@ class Drone:
     def current_hub(self) -> str:
         """Name of the hub this drone last departed from or reached."""
         return self._current_hub
+
+    @property
+    def display_hub(self) -> str:
+        """Name of the hub these on-screen coordinates belong to.
+
+        This is the hub it currently occupies, except while in
+        transit over a connection, when it's the destination hub it's
+        flying towards (see ``is_in_transit``).
+        """
+        return self._transit_destination or self._current_hub
+
+    @property
+    def position(self) -> tuple[int, int]:
+        """(x, y) coordinates to draw this drone at right now.
+
+        See ``display_hub`` for which hub these belong to.
+        """
+        hub = self._config.hubs[self.display_hub]
+        return hub.x, hub.y
+
+    @property
+    def snapshot(self) -> DronePosition:
+        """This drone's position and transit state, as a ``DronePosition``."""
+        hub_name = self.display_hub
+        hub = self._config.hubs[hub_name]
+        return DronePosition(
+            self._id, hub.x, hub.y, hub_name, hub.zone, self.is_in_transit
+        )
 
     @property
     def total_moves(self) -> int:

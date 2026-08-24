@@ -1,7 +1,9 @@
+"""Pathfinding and turn-based scheduling for the drone fleet."""
+
 import heapq
 
-from constants import ZoneType
-from drone import Drone
+from constants import ZoneType, TESTING
+from drone import Drone, DronePosition
 from map_config import MapConfig
 from text_printer import Printer
 from typing import Optional
@@ -26,17 +28,26 @@ class Initiator:
                 ``(drone_id, label)`` pairs per turn instead of a
                 pre-joined string, for callers that want to iterate
                 without re-parsing the text.
+            turn_positions: One ``DronePosition`` per drone per turn,
+                from the last run. ``turn_positions[i]`` is every
+                drone's position after turn ``i``, always in the same
+                drone order and covering every drone (including ones
+                already delivered, parked at the exit's coordinates),
+                so each entry can be used directly as an animation
+                frame.
         """
         self.config = config
         self.printer: Printer = Printer()
         self.drones: list[Drone] = []
         self.turns: list[str] = []
         self.turn_moves: list[list[tuple[int, str]]] = []
+        self.turn_positions: list[list[DronePosition]] = []
         self.printer.print_by_letter(
             "Initiating the simulation...",
             0.1,
             0.5,
-            "\033[92m"
+            "\033[92m",
+            TESTING
         )
 
     def fill_hub_connections(self) -> None:
@@ -79,7 +90,8 @@ class Initiator:
             "Serching a valid way to the end...",
             0.02,
             2,
-            "\033[92m"
+            "\033[92m",
+            TESTING
         )
         start = self.config.gates.entry.name
         end = self.config.gates.exit.name
@@ -260,6 +272,7 @@ class Initiator:
         drones = self.drones
         self.turns = []
         self.turn_moves = []
+        self.turn_positions = []
         start_name = config.gates.entry.name
         end_name = config.gates.exit.name
         connection_capacity = self._connection_capacities()
@@ -268,6 +281,7 @@ class Initiator:
         transit_keys: dict[int, frozenset[str]] = {}
 
         def hub_has_room(name: str) -> bool:
+            """Whether one more drone can enter hub ``name`` right now."""
             if name in (start_name, end_name):
                 return True
             limit = config.hubs[name].max_drones
@@ -276,14 +290,17 @@ class Initiator:
             return hub_occupancy.get(name, 0) < limit
 
         def enter_hub(name: str) -> None:
+            """Record one more drone occupying hub ``name``."""
             if name not in (start_name, end_name):
                 hub_occupancy[name] = hub_occupancy.get(name, 0) + 1
 
         def leave_hub(name: str) -> None:
+            """Record one drone freeing hub ``name``."""
             if name not in (start_name, end_name):
                 hub_occupancy[name] = hub_occupancy.get(name, 0) - 1
 
         def connection_has_room(key: frozenset[str]) -> bool:
+            """Whether one more drone can cross the connection ``key``."""
             return connection_usage.get(key, 0) < connection_capacity[key]
 
         while not all(drone.is_delivered for drone in drones):
@@ -350,3 +367,4 @@ class Initiator:
             self.turns.append(
                 " ".join(f"D{drone_id}-{label}" for drone_id, label in moves)
             )
+            self.turn_positions.append([drone.snapshot for drone in drones])

@@ -3,12 +3,14 @@
 from text_printer import Printer
 from exceptions import FileError
 from parser import Parser
+from constants import TESTING
 
 
 class StartProgram:
     """Coordinates the welcome prompt and map file loading."""
 
     def __init__(self) -> None:
+        """Set up the printer and parser used by the welcome flow."""
         self.printer = Printer()
         self.parser = Parser()
         self.file: str = ""
@@ -24,14 +26,16 @@ class StartProgram:
             "································",
             0.1,
             0.0,
-            "\033[92m"
+            "\033[92m",
+            TESTING
         )
-        self.printer.erase_line(1)
+        self.printer.erase_line(1, TESTING)
         self.printer.print_by_letter(
                                     "Welcome to the dron simulation...",
                                     0.02,
                                     1.0,
-                                    "\033[92m"
+                                    "\033[92m",
+                                    TESTING
                                     )
         self.printer.print_by_letter(
                                     "Introduce the name of the map: ",
@@ -52,7 +56,7 @@ class StartProgram:
         except OSError as e:
             raise FileError(f"The '{self.file}' file can't be opened") from e
 
-        self.printer.erase_line(3)
+        self.printer.erase_line(3, TESTING)
 
     def open_config(self) -> None:
         """Read and parse the previously validated map file.
