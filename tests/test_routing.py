@@ -17,6 +17,17 @@ def test_find_path_to_end_false_when_end_hub_is_unreachable(
     assert router.find_path_to_end() is False
 
 
+def test_find_path_to_end_false_when_the_only_route_is_blocked(
+    load_map: LoadMap,
+) -> None:
+    # maps/test/blocked_only_path.txt: start and goal are
+    # topologically connected, but the sole hub between them is
+    # zone=blocked -- a different failure mode from unreachable.txt,
+    # where nothing connects to the end hub at all.
+    router = Router(load_map("maps/test/blocked_only_path.txt"))
+    assert router.find_path_to_end() is False
+
+
 def test_find_path_to_end_ignores_blocked_detours(load_map: LoadMap) -> None:
     # maps/test/6.txt's middle hub is zone=blocked and isn't on the
     # only route from start to goal.
