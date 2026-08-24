@@ -82,8 +82,8 @@ if __name__ == "__main__":
         if not initialicer.find_path_to_end():
             raise PathError("There is not a posible way to the end.")
         initialicer.run_simulation()
-        show: Pyshow = Pyshow(starter.parser.config)
-        show.start(initialicer)
+        show: Pyshow = Pyshow(initialicer)
+        show.start()
 
     except KeyboardInterrupt:
         old_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)

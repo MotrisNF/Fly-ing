@@ -30,6 +30,7 @@ COLORS = {
     "CYAN": (0, 200, 200),
     "MAGENTA": (200, 0, 200),
     "GRAY": (128, 128, 128),
+    "DARK_BLUE": (0, 0, 100),
 }
 
 ZONE_COLORS: dict[ZoneType, tuple[int, int, int]] = {
@@ -40,3 +41,12 @@ ZONE_COLORS: dict[ZoneType, tuple[int, int, int]] = {
     "start": COLORS["CYAN"],
     "end": COLORS["MAGENTA"],
 }
+
+DESKTOP_OFFSET = 100
+MARGIN_X = 60
+MARGIN_Y = 200
+MAX_GRID = 140
+SIDEBAR_RATIO = 1 / 3
+TURN_DURATION_FRAMES = 45
+TURN_PAUSE_FRAMES = 8
+START_DELAY_FRAMES = 60
