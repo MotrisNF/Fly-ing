@@ -111,12 +111,21 @@ class Drone:
 
     @property
     def path_progress(self) -> int:
-        """Index of the current hub within this drone's assigned path.
-
-        Used by the scheduler to decide which drones (those closer
-        to the end) get to act first within a turn.
-        """
+        """Index of the current hub within this drone's assigned path."""
         return self._path_index
+
+    @property
+    def remaining_hops(self) -> int:
+        """Hops still needed to reach the end of this drone's path.
+
+        Unlike ``path_progress``, this is comparable across drones
+        with differently-sized routes: the scheduler uses it to let
+        whichever drone is actually closest to the end act first
+        within a turn, so a hub it frees can be used the same turn
+        by the drone behind it -- even when that drone took a longer
+        prefix to get there.
+        """
+        return len(self._path) - 1 - self._path_index
 
     @property
     def is_delivered(self) -> bool:

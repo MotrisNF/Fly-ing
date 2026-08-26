@@ -24,26 +24,30 @@ animation and terminal echo handling, both incompatible with pytest's
 captured stdin."""
 
 COLORS = {
-    "GREEN": (124, 252, 0),
-    "BLACK": (0, 0, 0),
-    "WHITE": (255, 255, 255),
-    "RED": (220, 20, 60),
+    "GREEN": (99, 127, 103),
+    "BLACK": (36, 34, 46),
+    "WHITE": (230, 235, 214),
+    "RED": (130, 14, 16),
     "ORANGE": (255, 140, 0),
     "GOLD": (255, 215, 0),
-    "CYAN": (0, 200, 200),
-    "MAGENTA": (200, 0, 200),
+    "CYAN": (106, 138, 153),
+    "MAGENTA": (148, 30, 168),
     "GRAY": (128, 128, 128),
-    "DARK_BLUE": (0, 0, 100),
+    "DARK_BLUE": (39, 46, 69),
+    "BROWN": (148, 90, 80),
+    "LIGTH_BLUE": (132, 173, 167),
+    "YELLOW": (217, 215, 161),
+    "LIGHT_GREEN": (129, 150, 126)
 }
 """RGB palette shared by sprites, badges and zone coloring."""
 
 ZONE_COLORS: dict[ZoneType, tuple[int, int, int]] = {
-    "normal": COLORS["WHITE"],
+    "normal": COLORS["YELLOW"],
     "blocked": COLORS["RED"],
     "restricted": COLORS["ORANGE"],
-    "priority": COLORS["GOLD"],
+    "priority": COLORS["LIGHT_GREEN"],
     "start": COLORS["CYAN"],
-    "end": COLORS["MAGENTA"],
+    "end": COLORS["BROWN"],
 }
 """Fill color drawn for each zone type."""
 
@@ -56,7 +60,7 @@ MARGIN_X = 60
 MARGIN_Y = 200
 """Vertical padding, in pixels, around the map grid."""
 
-MAX_GRID = 140
+MAX_GRID = 200
 """Largest cell size, in pixels, a map grid is ever drawn at."""
 
 SIDEBAR_RATIO = 1 / 3
@@ -74,7 +78,7 @@ START_DELAY_FRAMES = 60
 FRAME_RATE = 30.0
 """Target frames per second for the pygame window."""
 
-NODE_SPRITE_SCALE = 0.7
+NODE_SPRITE_SCALE = 0.55
 """Node sprite size, as a fraction of the grid cell size."""
 
 DRONE_SPRITE_SCALE = 0.55
@@ -83,10 +87,10 @@ DRONE_SPRITE_SCALE = 0.55
 MOON_SIZE_DIVISOR = 4
 """The moon's diameter is the shorter map dimension divided by this."""
 
-CONNECTION_LINE_WIDTH = 6
+CONNECTION_LINE_WIDTH = 10
 """Width of the black outline drawn under each connection line."""
 
-CONNECTION_LINE_INNER_WIDTH = 2
+CONNECTION_LINE_INNER_WIDTH = 4
 """Width of the white line drawn on top, giving the outlined look."""
 
 BADGE_BORDER_WIDTH = 2
@@ -134,19 +138,20 @@ TURN_LABEL_FONT_FLOOR = 24
 TURN_LABEL_SIDEBAR_DIVISOR = 12
 """Divides the sidebar width to get the label's proportional font size."""
 
-TURN_LABEL_MARGIN = 20
+TURN_LABEL_MARGIN_TOP = 50
+TURN_LABEL_MARGIN_SIDE = 250
 """Pixels between the turn counter label and the sidebar's edges."""
 
 NORMAL_ZONE_TURN_COST = 1
-"""Turns spent crossing a normal or priority hub; see VII.3."""
+"""Turns spent crossing a normal or priority hub."""
 
 RESTRICTED_ZONE_TURN_COST = 2
-"""Turns spent crossing a restricted hub; see VII.3."""
+"""Turns spent crossing a restricted hub."""
 
 MAX_CANDIDATE_PATHS = 8
 """Most alternate routes Router keeps per drone during route planning."""
 
-PATH_COST_CEILING_RATIO = 3.0
+PATH_COST_CEILING_RATIO = 3.5
 """A candidate route is dropped once it costs this many times the best."""
 
 PRIORITY_BIAS = 1e-3

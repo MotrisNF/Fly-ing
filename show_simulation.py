@@ -11,8 +11,11 @@ from constants import (
     DRONE_BADGE_RADIUS_FLOOR, DRONE_BADGE_FONT_FLOOR, DRONE_BADGE_GRID_DIVISOR,
     DRONE_BADGE_SIZE_CAP_DIVISOR, DRONE_BADGE_RADIUS_SIZE_CAP_MIN,
     DRONE_BADGE_FONT_SIZE_CAP_MIN, TURN_LABEL_FONT_FLOOR,
-    TURN_LABEL_SIDEBAR_DIVISOR, TURN_LABEL_MARGIN
+    TURN_LABEL_SIDEBAR_DIVISOR, TURN_LABEL_MARGIN_TOP,
+    TURN_LABEL_MARGIN_SIDE
 )
+
+from collections import deque
 
 import math
 import pygame
@@ -111,6 +114,30 @@ class Pyshow():
                 return (x1 - x0, y1 - y0)
         return (0, -1)
 
+    def _distances_from_entry(self) -> dict[str, int]:
+        """Hop-distance from the entry hub to every other hub.
+
+        Used to tell, for a given connection, which endpoint is
+        "downstream" -- the one a drone would be advancing towards
+        when moving away from the entry -- so its zone (not the
+        upstream one) decides the connection badge's color.
+        """
+        adjacency: dict[str, list[str]] = {name: [] for name in self._c.hubs}
+        for connection in self._c.connections:
+            adjacency[connection.pos1].append(connection.pos2)
+            adjacency[connection.pos2].append(connection.pos1)
+
+        start_name = self._c.gates.entry.name
+        distances = {start_name: 0}
+        queue = deque([start_name])
+        while queue:
+            current = queue.popleft()
+            for neighbor in adjacency[current]:
+                if neighbor not in distances:
+                    distances[neighbor] = distances[current] + 1
+                    queue.append(neighbor)
+        return distances
+
     def start(self) -> None:
         """Open the window, draw the static map, and animate the fleet."""
         pygame.init()
@@ -147,6 +174,7 @@ class Pyshow():
 
         sidebar_rect = pygame.Rect(map_width, 0, sidebar_width, map_height)
         pygame.draw.rect(back_ground, COLORS["BLACK"], sidebar_rect)
+        pygame.draw.rect(back_ground, COLORS["BROWN"], sidebar_rect, width=24)
 
         usable_width = map_width - MARGIN_X * 2
         usable_height = map_height - MARGIN_Y * 2
@@ -200,7 +228,12 @@ class Pyshow():
                 size // CAPACITY_BADGE_SIZE_CAP_DIVISOR
             )
         )
-        capacity_font = pygame.font.SysFont(None, capacity_font_px)
+        capacity_font = pygame.font.Font(
+            "assets/PressStart2P-Regular.ttf",
+            capacity_font_px)
+        entry_distances = self._distances_from_entry()
+        restricted_badges: list[tuple[tuple[int, int], int, tuple]] = []
+        other_badges: list[tuple[tuple[int, int], int, tuple]] = []
         for connection in self._c.connections:
             pos1 = self._centers[connection.pos1]
             pos2 = self._centers[connection.pos2]
@@ -208,25 +241,49 @@ class Pyshow():
                 back_ground, COLORS["BLACK"], pos1, pos2,
                 CONNECTION_LINE_WIDTH
             )
-
-            midpoint = (
-                (pos1[0] + pos2[0]) // 2,
-                (pos1[1] + pos2[1]) // 2,
-            )
-            pygame.draw.circle(
-                back_ground, COLORS["WHITE"], midpoint, capacity_radius
-            )
-            pygame.draw.circle(
-                back_ground, COLORS["BLACK"], midpoint, capacity_radius,
-                BADGE_BORDER_WIDTH
-            )
             pygame.draw.line(
                 back_ground, COLORS["WHITE"], pos1, pos2,
                 CONNECTION_LINE_INNER_WIDTH
             )
 
+            midpoint = (
+                (pos1[0] + pos2[0]) // 2,
+                (pos1[1] + pos2[1]) // 2,
+            )
+
+            downstream_name = connection.pos2
+            if (
+                entry_distances.get(connection.pos1, 0)
+                > entry_distances.get(connection.pos2, 0)
+            ):
+                downstream_name = connection.pos1
+            downstream_zone = self._c.hubs[downstream_name].zone
+
+            if downstream_zone == "restricted":
+                badge_fill = ZONE_COLORS["restricted"]
+                restricted_badges.append(
+                    (midpoint, connection.capacity, badge_fill)
+                )
+            else:
+                badge_fill = (
+                    ZONE_COLORS["priority"] if downstream_zone == "priority"
+                    else COLORS["WHITE"]
+                )
+                other_badges.append(
+                    (midpoint, connection.capacity, badge_fill)
+                )
+
+        for midpoint, capacity, badge_fill in restricted_badges + other_badges:
+            pygame.draw.circle(
+                back_ground, badge_fill, midpoint, capacity_radius
+            )
+            pygame.draw.circle(
+                back_ground, COLORS["BLACK"], midpoint, capacity_radius,
+                BADGE_BORDER_WIDTH
+            )
+
             capacity_label = capacity_font.render(
-                str(connection.capacity), False, COLORS["BLACK"]
+                str(capacity), False, COLORS["BLACK"]
             )
             capacity_rect = capacity_label.get_rect(center=midpoint)
             back_ground.blit(capacity_label, capacity_rect)
@@ -291,7 +348,9 @@ class Pyshow():
                 drone_size // DRONE_BADGE_SIZE_CAP_DIVISOR
             )
         )
-        drone_badge_font = pygame.font.SysFont(None, drone_badge_font_px)
+        drone_badge_font = pygame.font.Font(
+            "assets/PressStart2P-Regular.ttf",
+            drone_badge_font_px)
 
         entry = self._c.gates.entry
         turn_positions = self._initiator.turn_positions
@@ -311,8 +370,8 @@ class Pyshow():
                     (turn_index, sx, sy)
                 )
 
-        turn_font = pygame.font.SysFont(
-            None,
+        turn_font = pygame.font.Font(
+            "assets/PressStart2P-Regular.ttf",
             max(
                 TURN_LABEL_FONT_FLOOR,
                 sidebar_width // TURN_LABEL_SIDEBAR_DIVISOR
@@ -367,11 +426,13 @@ class Pyshow():
                 screen.blit(drone_label, drone_label_rect)
 
             turn_label = turn_font.render(
-                f"Turno {min(elapsed_turns, total_turns)}/{total_turns}",
+                f"Turno {min(elapsed_turns, total_turns)}",
                 False, COLORS["WHITE"]
             )
             screen.blit(
-                turn_label, (map_width + TURN_LABEL_MARGIN, TURN_LABEL_MARGIN)
+                turn_label, (
+                    map_width + TURN_LABEL_MARGIN_SIDE,
+                    TURN_LABEL_MARGIN_TOP)
             )
 
             pygame.display.flip()

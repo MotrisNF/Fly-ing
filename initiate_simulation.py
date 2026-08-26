@@ -176,7 +176,7 @@ class Initiator:
                 moves.append((drone.id, drone.current_label))
 
             order = sorted(
-                drones, key=lambda d: (-d.path_progress, d.id)
+                drones, key=lambda d: (d.remaining_hops, d.id)
             )
             one_turn_releases: list[frozenset[str]] = []
             for drone in order:
