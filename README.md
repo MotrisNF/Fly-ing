@@ -36,11 +36,21 @@ Per the subject's requirement to keep all files at the repository
 root, every module that makes up the actual deliverable (the parser,
 the router, the scheduler, the graphical view, `main.py`,
 `performance.py`, the `Makefile`, this `README.md`, `requirements.txt`)
-lives directly at the root, alongside `assets/` (sprites and fonts,
-loaded by a relative path at runtime) and `maps/` (the reference maps
-`make performance` reads). Everything *not* needed to run or grade the
-project — the subject material and the development-only test suite —
-is kept apart under `dependences/`, which isn't part of the delivery.
+lives directly at the root, alongside:
+
+- `assets/` — sprites and fonts, loaded by a relative path at runtime.
+- `maps/` — the subject's reference maps under
+  `maps/{easy,medium,hard,challenger}/` (read by `make performance`),
+  plus custom edge-case and error-handling maps under `maps/test/` and
+  `maps/bad_map/` (the subject explicitly recommends adding your own,
+  Chapter VII.4).
+- `testing/` — the `pytest` suite (with `pytest.ini` at the root). Not
+  graded (Chapter III.3), but kept in the repo; run it with
+  `python -m pytest`.
+
+The only thing left out is the subject material itself
+(`en.subject.pdf`, `maps.tar.gz`, ...), kept under `dependences/`,
+which is `.gitignore`d and not submitted.
 
 ### Requirements
 
@@ -271,17 +281,16 @@ simulation ends after 5 turns.
 
 ## Testing
 
-During development, the project was covered by a `pytest` suite (unit
-tests for the parser, the router's pathfinding/planning, the turn
-scheduler, and the pure animation-timing helpers in the graphical
-view). As noted in the subject (Chapter III.3), test programs are for
-development only and are not submitted or evaluated, so it lives under
-`dependences/tests/` — alongside the subject material — rather than in
-the graded root, and is not part of this delivery. If it's kept around
-locally, it still runs from the repository root with:
+The project is covered by a `pytest` suite (unit tests for the parser,
+the router's pathfinding/planning, the turn scheduler, and the pure
+animation-timing helpers in the graphical view) under `testing/`,
+configured by `pytest.ini` at the repository root. As noted in the
+subject (Chapter III.3), test programs are not submitted or graded,
+but they're kept in the repo anyway. The suite reads its fixtures from
+`maps/`, so run it from the repository root with:
 
 ```
-python -m pytest -c dependences/pytest.ini
+python -m pytest
 ```
 
 ## Resources
