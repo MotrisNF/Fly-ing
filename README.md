@@ -30,6 +30,18 @@ an optional animated graphical view built with `pygame`.
 
 ## Instructions
 
+### Project layout
+
+Per the subject's requirement to keep all files at the repository
+root, every module that makes up the actual deliverable (the parser,
+the router, the scheduler, the graphical view, `main.py`,
+`performance.py`, the `Makefile`, this `README.md`, `requirements.txt`)
+lives directly at the root, alongside the `assets/` (sprites and
+fonts) and `maps/` (reference maps) folders the code reads at
+runtime. Everything not needed to run or grade the project — the
+subject material and the development-only test suite — is kept apart
+under `dependences/`.
+
 ### Requirements
 
 - Python 3.10+
@@ -263,8 +275,14 @@ During development, the project was covered by a `pytest` suite (unit
 tests for the parser, the router's pathfinding/planning, the turn
 scheduler, and the pure animation-timing helpers in the graphical
 view). As noted in the subject (Chapter III.3), test programs are for
-development only and are not submitted or evaluated, so the test suite
-is not part of this delivery.
+development only and are not submitted or evaluated, so it lives under
+`dependences/tests/` — alongside the subject material — rather than in
+the graded root, and is not part of this delivery. If it's kept around
+locally, it still runs from the repository root with:
+
+```
+python -m pytest -c dependences/pytest.ini
+```
 
 ## Resources
 
