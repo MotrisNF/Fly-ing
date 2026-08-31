@@ -294,14 +294,11 @@ python -m pytest -c dependences/pytest.ini
 - [Pydantic documentation](https://docs.pydantic.dev/) — the validated
   map data model in `map_config.py`.
 
-**AI usage**: Claude (Claude Code) was used as a development assistant
+**AI usage**: the AI was used as a development assistant
 throughout this project, always with the resulting code read, run
 (including the `pytest` suite and manual/headless `pygame` checks), and
 understood before being kept. Concretely, it helped with: iterating on
-the `pygame` graphical view (zoom/pan camera, playback controls, the
-commander mascot animation), editing map sprite assets, extending the
-`Makefile` and writing `performance.py`, a refactor to remove the
-project's last remaining module-level utility functions in favor of
-class methods (for the subject's "strictly object-oriented" rule), and
-drafting this `README.md`. Every change was verified against the
+the `pygame` graphical view, editing map sprite assets and  extending the
+`Makefile`.
+Also drafting this `README.md`. Every change was verified against the
 existing test suite and `mypy --strict`/`flake8` before being accepted.
