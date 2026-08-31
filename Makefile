@@ -30,7 +30,7 @@ destroy:
 re-install: destroy install
 
 clean:
-	rm -rf .mypy_cache && rm -rf __pycache__
+	rm -rf .mypy_cache && rm -rf __pycache__ && rm -rf .pytest_cache
 
 lint: install
 	if $(PYTHON) -m flake8 .; then \

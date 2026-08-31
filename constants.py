@@ -275,3 +275,15 @@ SIMULATION_DIALOG_PHRASES = [
     "Reset returns to turn zero",
 ]
 """Random flavor phrases the commander "says" in the sidebar dialog box."""
+
+PERFORMANCE_PRINT_SPEED = 0.005
+"""Seconds between each letter of a ``make performance`` report line."""
+
+PERFORMANCE_PRINT_PAUSE = 0.05
+"""Seconds paused after a ``make performance`` report line finishes."""
+
+ANSI_GREEN = "\033[92m"
+"""ANSI escape code for bright green terminal text (a target met)."""
+
+ANSI_RED = "\033[91m"
+"""ANSI escape code for bright red terminal text (a target missed)."""

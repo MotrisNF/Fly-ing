@@ -13,13 +13,18 @@ truth for what "performance" checks.
 
 from dataclasses import dataclass
 
+from constants import (
+    ANSI_GREEN, ANSI_RED, PERFORMANCE_PRINT_PAUSE, PERFORMANCE_PRINT_SPEED
+)
 from exceptions import ConfigError, PathError
 from initiate_simulation import Initiator
 from parser import Parser
+from text_printer import Printer
 
 import initiate_simulation
 import os
 import sys
+from time import sleep
 
 # This report's own output should stay a clean, one-line-per-map
 # table regardless of how TESTING is set for a normal run of main.py,
@@ -53,10 +58,6 @@ class PerformanceReport:
 
     _MAPS_DIR = "maps"
     _REQUIRED_SUBDIRS = ("easy", "medium", "hard", "challenger")
-
-    _GREEN = "\033[92m"
-    _RED = "\033[91m"
-    _RESET = "\033[0m"
 
     _GROUPS: list[tuple[str, list[Benchmark]]] = [
         ("Easy Maps", [
@@ -125,9 +126,11 @@ class PerformanceReport:
             if not os.path.isdir(os.path.join(self._MAPS_DIR, name))
         ]
 
-    def _color(self, text: str, color: str) -> str:
-        """Wrap ``text`` in an ANSI color code, reset at the end."""
-        return f"{color}{text}{self._RESET}"
+    def _print(self, text: str, color: str) -> None:
+        """Print one report line letter by letter, like main.py does."""
+        Printer.print_by_letter(
+            text, PERFORMANCE_PRINT_SPEED, PERFORMANCE_PRINT_PAUSE, color
+        )
 
     def _solve(self, path: str) -> int:
         """Load and solve one map, returning its total turn count.
@@ -149,10 +152,10 @@ class PerformanceReport:
         try:
             turns = self._solve(benchmark.path)
         except (ConfigError, PathError, OSError) as error:
-            print(self._color(
+            self._print(
                 f"◦ {benchmark.label}: could not solve ({error})",
-                self._RED
-            ))
+                ANSI_RED
+            )
             if not benchmark.optional:
                 self._all_passed = False
             return
@@ -167,12 +170,12 @@ class PerformanceReport:
             else f"target ≤{benchmark.target_turns} turns"
         )
         status = "PASS" if passed else "FAIL"
-        color = self._GREEN if passed else self._RED
-        print(self._color(
+        color = ANSI_GREEN if passed else ANSI_RED
+        self._print(
             f"◦ {benchmark.label}: {goal} "
             f"-- solved in {turns} turns [{status}]",
             color
-        ))
+        )
 
     def run(self) -> bool:
         """Print every group's results.
@@ -184,32 +187,34 @@ class PerformanceReport:
             the build).
         """
         if not os.path.isdir(self._MAPS_DIR):
-            print(self._color(
-                f"Missing '{self._MAPS_DIR}/' directory.", self._RED
-            ))
+            self._print(
+                f"Missing '{self._MAPS_DIR}/' directory.", ANSI_RED
+            )
             return False
         missing = self._missing_directories()
         if missing:
-            print(self._color(
+            self._print(
                 f"Missing subdirectories under '{self._MAPS_DIR}/': "
                 f"{', '.join(missing)}",
-                self._RED
-            ))
+                ANSI_RED
+            )
             return False
 
         for title, benchmarks in self._GROUPS:
-            print(f"{title}:")
+            self._print(f"{title}:", "\033[0m")
+            sleep(0.5)
             for benchmark in benchmarks:
                 self._report_one(benchmark)
+            sleep(0.5)
             print()
 
+        sleep(2)
         summary = (
             "All mandatory targets met." if self._all_passed
             else "Some mandatory targets were missed."
         )
-        print(self._color(
-            summary, self._GREEN if self._all_passed else self._RED
-        ))
+
+        self._print(summary, ANSI_GREEN if self._all_passed else ANSI_RED)
         return True
 
 
