@@ -18,7 +18,7 @@ _HUB_METADATA_KEYS = {"zone", "color", "max_drones"}
 _CONNECTION_METADATA_KEYS = {"max_link_capacity"}
 """Metadata keys accepted inside a ``connection:`` line's ``[...]`` block."""
 
-TESTING = True
+TESTING = False
 """Passed to ``Printer.print_by_letter`` to skip the letter-by-letter
 animation and terminal echo handling, both incompatible with pytest's
 captured stdin."""

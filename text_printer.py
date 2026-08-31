@@ -1,5 +1,6 @@
 """Terminal output helpers for the letter-by-letter animated prompts."""
 
+import io
 import os
 import sys
 import termios
@@ -32,8 +33,17 @@ class Printer:
         """
         if testing:
             return
-        fd = sys.stdin.fileno()
-        is_tty = os.isatty(fd)
+        try:
+            fd = sys.stdin.fileno()
+            is_tty = os.isatty(fd)
+        except (OSError, ValueError, io.UnsupportedOperation):
+            # stdin has no real file descriptor at all to wait on or
+            # restore afterwards -- e.g. pytest's captured stdin, or
+            # any other fully detached stream. There's no terminal to
+            # animate for, so print plainly instead of both crashing
+            # on it and paying for every letter's sleep.
+            print(f"{color}{text}\033[0m")
+            return
         old_settings = None
         if is_tty:
             old_settings = termios.tcgetattr(fd)

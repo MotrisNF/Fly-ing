@@ -11,8 +11,7 @@ from initiate_simulation import Initiator
 _TURN_LINE = re.compile(r"^D\d+-\S+( D\d+-\S+)*$")
 
 _LIGHT_MAPS = [
-    "maps/test/1.txt", "maps/test/2.txt", "maps/test/3.txt", "maps/test/4.txt",
-    "maps/test/5.txt", "maps/test/6.txt", "maps/test/7.txt", "maps/test/8.txt",
+    f"maps/test/{number}.txt" for number in range(1, 9)
 ]
 
 

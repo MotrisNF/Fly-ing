@@ -36,11 +36,11 @@ Per the subject's requirement to keep all files at the repository
 root, every module that makes up the actual deliverable (the parser,
 the router, the scheduler, the graphical view, `main.py`,
 `performance.py`, the `Makefile`, this `README.md`, `requirements.txt`)
-lives directly at the root, alongside the `assets/` (sprites and
-fonts) and `maps/` (reference maps) folders the code reads at
-runtime. Everything not needed to run or grade the project — the
-subject material and the development-only test suite — is kept apart
-under `dependences/`.
+lives directly at the root, alongside `assets/` (sprites and fonts,
+loaded by a relative path at runtime) and `maps/` (the reference maps
+`make performance` reads). Everything *not* needed to run or grade the
+project — the subject material and the development-only test suite —
+is kept apart under `dependences/`, which isn't part of the delivery.
 
 ### Requirements
 

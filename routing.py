@@ -28,7 +28,7 @@ class Router:
 
     @staticmethod
     def zone_cost(zone: ZoneType) -> Optional[int]:
-        """Turns needed to move into a hub of the given zone type.
+        """Return the turns needed to move into a hub of this zone type.
 
         Args:
             zone: The destination hub's zone type.

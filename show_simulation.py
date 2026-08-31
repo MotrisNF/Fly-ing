@@ -1,3 +1,11 @@
+"""Pygame-based graphical playback of a finished drone simulation.
+
+Draws the static map once, then animates the recorded per-turn drone
+positions frame by frame, with a zoom/pan camera and sidebar playback
+controls (play/pause, speed, reset) alongside a small narrating
+mascot.
+"""
+
 from initiate_simulation import Initiator
 from exceptions import PathError
 from constants import (
@@ -29,8 +37,14 @@ from constants import (
 from collections import deque
 
 import math
-import pygame
+import os
 import random
+
+# Must be set before ``import pygame`` to suppress the "Hello from the
+# pygame community" support-prompt banner it otherwise prints on import.
+os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
+
+import pygame  # noqa: E402
 
 
 class Pyshow():
