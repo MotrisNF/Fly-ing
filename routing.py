@@ -23,39 +23,42 @@ from map_config import MapConfig
 from exceptions import PathError
 
 
-def zone_cost(zone: ZoneType) -> Optional[int]:
-    """Turns needed to move into a hub of the given zone type.
-
-    Args:
-        zone: The destination hub's zone type.
-
-    Returns:
-        The movement cost in turns, or ``None`` if the zone is
-        ``blocked`` and can never be entered.
-    """
-    if zone == "blocked":
-        return None
-    if zone == "restricted":
-        return RESTRICTED_ZONE_TURN_COST
-    return NORMAL_ZONE_TURN_COST
-
-
-def connection_capacities(config: MapConfig) -> dict[frozenset[str], int]:
-    """Map each connection's endpoints to its crossing capacity.
-
-    Args:
-        config: The validated map.
-
-    Returns:
-        A lookup from ``{pos1, pos2}`` to ``max_link_capacity``.
-    """
-    return {
-        frozenset((c.pos1, c.pos2)): c.capacity for c in config.connections
-    }
-
-
 class Router:
     """Finds and plans entry->exit routes over a validated map graph."""
+
+    @staticmethod
+    def zone_cost(zone: ZoneType) -> Optional[int]:
+        """Turns needed to move into a hub of the given zone type.
+
+        Args:
+            zone: The destination hub's zone type.
+
+        Returns:
+            The movement cost in turns, or ``None`` if the zone is
+            ``blocked`` and can never be entered.
+        """
+        if zone == "blocked":
+            return None
+        if zone == "restricted":
+            return RESTRICTED_ZONE_TURN_COST
+        return NORMAL_ZONE_TURN_COST
+
+    @staticmethod
+    def connection_capacities(
+        config: MapConfig
+    ) -> dict[frozenset[str], int]:
+        """Map each connection's endpoints to its crossing capacity.
+
+        Args:
+            config: The validated map.
+
+        Returns:
+            A lookup from ``{pos1, pos2}`` to ``max_link_capacity``.
+        """
+        return {
+            frozenset((c.pos1, c.pos2)): c.capacity
+            for c in config.connections
+        }
 
     def __init__(self, config: MapConfig) -> None:
         """Attach every connection to the hubs it links.
@@ -268,11 +271,11 @@ class Router:
             if name in (start_name, end_name):
                 continue
             hub = config.hubs[name]
-            cost = zone_cost(hub.zone)
+            cost = self.zone_cost(hub.zone)
             if hub.max_drones is not None and cost is not None:
                 rates.append(hub.max_drones / cost)
         for a, b in zip(path, path[1:]):
-            cost = zone_cost(config.hubs[b].zone)
+            cost = self.zone_cost(config.hubs[b].zone)
             if cost is not None:
                 rates.append(link_capacity[frozenset((a, b))] / cost)
         return min(rates) if rates else 1.0
@@ -331,7 +334,7 @@ class Router:
             of ``plan_routes``.
         """
         path, _ = self._dijkstra({})
-        link_capacity = connection_capacities(self.config)
+        link_capacity = self.connection_capacities(self.config)
         throughput = self._bottleneck_throughput(path, link_capacity)
         return self.config.nb_drones / throughput > COMPLEXITY_THRESHOLD
 
@@ -351,7 +354,7 @@ class Router:
         """
         candidates = self._generate_candidate_routes()
 
-        link_capacity = connection_capacities(self.config)
+        link_capacity = self.connection_capacities(self.config)
         bottlenecks = [
             self._bottleneck_capacity(path, link_capacity)
             for path, _ in candidates
@@ -384,7 +387,7 @@ class Router:
         """
         candidates = self._generate_candidate_routes()
 
-        link_capacity = connection_capacities(self.config)
+        link_capacity = self.connection_capacities(self.config)
         throughputs = [
             self._bottleneck_throughput(path, link_capacity)
             for path, _ in candidates

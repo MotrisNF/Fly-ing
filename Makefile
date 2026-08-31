@@ -18,6 +18,12 @@ install: env
 run: install
 	@$(PYTHON) main.py
 
+debug: install
+	@$(PYTHON) -m pdb main.py
+
+performance: install
+	@$(PYTHON) performance.py
+
 destroy:
 	rm -rf $(ENV_SOURCE)
 
@@ -40,4 +46,4 @@ lint-strict: install
 	$(PYTHON) -m $(MYPY) --strict .; \
 	true
 
-.PHONY: env install run destroy re-install lint lint-strict
+.PHONY: env install run debug performance destroy re-install lint lint-strict

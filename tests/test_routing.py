@@ -2,7 +2,7 @@
 
 from conftest import LoadMap, MakeChainConfig
 from map_config import Connection, Gate, Gates, Hub, MapConfig
-from routing import Router, connection_capacities, zone_cost
+from routing import Router
 
 
 def test_find_path_to_end_true_when_reachable(load_map: LoadMap) -> None:
@@ -98,10 +98,10 @@ def test_refine_routes_never_makes_the_starting_assignment_worse(
 
 
 def test_zone_cost_matches_the_subject_rules() -> None:
-    assert zone_cost("normal") == 1
-    assert zone_cost("priority") == 1
-    assert zone_cost("restricted") == 2
-    assert zone_cost("blocked") is None
+    assert Router.zone_cost("normal") == 1
+    assert Router.zone_cost("priority") == 1
+    assert Router.zone_cost("restricted") == 2
+    assert Router.zone_cost("blocked") is None
 
 
 def test_bottleneck_throughput_halves_for_a_restricted_stage(
@@ -111,12 +111,14 @@ def test_bottleneck_throughput_halves_for_a_restricted_stage(
     restricted_config = make_chain_config([("restricted", 1)])
 
     normal_throughput = Router(normal_config)._bottleneck_throughput(
-        ["start", "h0", "end"], connection_capacities(normal_config)
+        ["start", "h0", "end"],
+        Router.connection_capacities(normal_config)
     )
     restricted_throughput = Router(
         restricted_config
     )._bottleneck_throughput(
-        ["start", "h0", "end"], connection_capacities(restricted_config)
+        ["start", "h0", "end"],
+        Router.connection_capacities(restricted_config)
     )
     assert restricted_throughput == normal_throughput / 2
 

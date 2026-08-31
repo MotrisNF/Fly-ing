@@ -51,7 +51,7 @@ ZONE_COLORS: dict[ZoneType, tuple[int, int, int]] = {
 }
 """Fill color drawn for each zone type."""
 
-DESKTOP_OFFSET = 100
+DESKTOP_OFFSET = 200
 """Pixels subtracted from the desktop resolution when sizing the window."""
 
 MARGIN_X = 60
@@ -162,3 +162,116 @@ COMPLEXITY_THRESHOLD = 20.0
 
 REFINE_TRIAL_BUDGET = 400
 """Local-search trials refine_routes runs before giving up on improving."""
+
+SIMULATION_DEFAULT_SPEED = 1.0
+"""Turn-playback speed multiplier the simulation starts at."""
+
+SIMULATION_MIN_SPEED = 0.25
+"""Slowest playback speed the "slow" button can reach."""
+
+SIMULATION_MAX_SPEED = 4.0
+"""Fastest playback speed the "fast" button can reach."""
+
+SIMULATION_SPEED_STEP = 2.0
+"""Factor the "fast"/"slow" buttons multiply or divide the speed by."""
+
+COMMANDER_SPRITE_SCALE = 0.6
+"""Commander portrait size, as a fraction of the sidebar width."""
+
+COMMANDER_MARGIN_TOP = 40
+"""Pixel gap between the turn counter label and the commander portrait."""
+
+CONTROL_BUTTON_SCALE = 0.18
+"""Each control button's width, as a fraction of the sidebar width."""
+
+CONTROL_BUTTON_SPACING = 20
+"""Pixel gap between neighboring control buttons."""
+
+CONTROL_PANEL_MARGIN_BOTTOM = 50
+"""Pixel gap between the bottom of the sidebar and the speed bar above it."""
+
+CONTROL_BUTTON_GROUP_GAP = 50
+"""Pixel gap separating the reset button from the speed control group."""
+
+SPEED_BAR_MARGIN_TOP = 30
+"""Pixel gap between the control buttons and the speed bar below them."""
+
+SPEED_BAR_HEIGHT = 28
+"""Height, in pixels, of the speed bar track."""
+
+SPEED_BAR_BORDER_WIDTH = 4
+"""Outline thickness of the speed bar track."""
+
+SPEED_BAR_TICK_WIDTH = 4
+"""Width of the center tick marking the default (standard) speed."""
+
+SPEED_BAR_INDICATOR_WIDTH = 10
+"""Width of the marker showing the current speed on the bar."""
+
+MAP_ZOOM_DEFAULT = 1.0
+"""Zoom level the map view starts at -- the initial, unzoomed state."""
+
+MAP_ZOOM_MIN = 0.75
+"""Smallest zoom level the mouse wheel can reach on the map view, letting
+it pull back a bit further than the initial state."""
+
+MAP_ZOOM_MAX = 4.0
+"""Largest zoom level the mouse wheel can reach on the map view."""
+
+MAP_ZOOM_STEP_FACTOR = 1.1
+"""Multiplier applied to the zoom level per mouse wheel notch."""
+
+COMMANDER_FRAME_PADDING = 10
+"""Padding, in pixels, between the commander portrait and its frame."""
+
+COMMANDER_FRAME_BORDER_WIDTH = 4
+"""Outline thickness of the frame drawn around the commander portrait."""
+
+DIALOG_BOX_MARGIN_SIDE = 20
+"""Horizontal margin, in pixels, between the dialog box and the sidebar's
+edges."""
+
+DIALOG_BOX_MARGIN_TOP = 30
+"""Pixel gap between the commander frame and the dialog box below it."""
+
+DIALOG_BOX_MARGIN_BOTTOM = 30
+"""Pixel gap between the dialog box and the control buttons below it."""
+
+DIALOG_BOX_PADDING = 16
+"""Padding, in pixels, between the dialog box border and its text."""
+
+DIALOG_BOX_BORDER_WIDTH = 4
+"""Outline thickness of the dialog box border."""
+
+DIALOG_FONT_SIDEBAR_DIVISOR = 22
+"""Divides the sidebar width to get the dialog text's font size."""
+
+DIALOG_FONT_FLOOR = 10
+"""Smallest font size the dialog text ever uses."""
+
+DIALOG_LINE_SPACING = 8
+"""Pixel gap between successive lines of the dialog text."""
+
+DIALOG_TYPE_FRAMES_PER_CHAR = 3
+"""Frames held between revealing each new letter of the dialog text."""
+
+DIALOG_HOLD_FRAMES = 90
+"""Frames a fully-typed dialog phrase stays on screen before changing."""
+
+MANDIBLE_TOGGLE_FRAMES = 4
+"""Frames between each mandible open/closed flip while the commander
+"talks"."""
+
+SIMULATION_DIALOG_PHRASES = [
+    "Welcome to the simulation",
+    "Drones inbound to the hub",
+    "Watch for restricted zones",
+    "Priority routes save time",
+    "Plotting the fastest path",
+    "Blocked zones are off limits",
+    "Stand by for departure",
+    "All systems operational",
+    "Hub capacity is holding",
+    "Reset returns to turn zero",
+]
+"""Random flavor phrases the commander "says" in the sidebar dialog box."""

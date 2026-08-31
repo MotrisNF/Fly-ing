@@ -1,4 +1,4 @@
-# Minimal map: just the two gates, directly connected.
+# Small map: the two gates chained through two intermediate hubs.
 nb_drones: 2
 start_hub: a 0 0 [color=cyan]
 hub: medium 0 1 [color=magenta zone=restricted]

@@ -26,8 +26,8 @@ def test_valid_map_parses(load_map: LoadMap) -> None:
     assert config.nb_drones == 2
     assert config.gates.entry.name == "a"
     assert config.gates.exit.name == "b"
-    assert set(config.hubs) == {"a", "b"}
-    assert len(config.connections) == 1
+    assert set(config.hubs) == {"a", "b", "medium", "other"}
+    assert len(config.connections) == 3
 
 
 def test_hub_metadata_is_read(load_map: LoadMap) -> None:

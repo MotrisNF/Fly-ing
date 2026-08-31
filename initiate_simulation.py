@@ -5,10 +5,10 @@ only turns a chosen set of routes into an actual turn-by-turn
 simulation.
 """
 
-from constants import TESTING
+from constants import TESTING as TESTING
 from drone import Drone, DronePosition
 from map_config import MapConfig
-from routing import Router, zone_cost, connection_capacities
+from routing import Router
 from text_printer import Printer
 from typing import Optional
 from exceptions import PathError
@@ -133,7 +133,7 @@ class Initiator:
         turn_positions: list[list[DronePosition]] = []
         start_name = config.gates.entry.name
         end_name = config.gates.exit.name
-        connection_capacity = connection_capacities(config)
+        connection_capacity = Router.connection_capacities(config)
         connection_usage: dict[frozenset[str], int] = {}
         hub_occupancy: dict[str, int] = {}
         transit_keys: dict[int, frozenset[str]] = {}
@@ -194,7 +194,7 @@ class Initiator:
                 if not connection_has_room(key):
                     continue
 
-                cost = zone_cost(config.hubs[next_hub].zone)
+                cost = Router.zone_cost(config.hubs[next_hub].zone)
                 assert cost is not None
 
                 leave_hub(current_hub)

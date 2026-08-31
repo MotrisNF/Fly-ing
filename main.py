@@ -2,7 +2,7 @@
 
 from exceptions import ConfigError, PathError
 from starter import StartProgram
-from text_printer import Printer
+from text_printer import Printer as Printer
 from initiate_simulation import Initiator
 from constants import TESTING
 from show_simulation import Pyshow
