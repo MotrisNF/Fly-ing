@@ -32,25 +32,33 @@ an optional animated graphical view built with `pygame`.
 
 ### Project layout
 
-Per the subject's requirement to keep all files at the repository
-root, every module that makes up the actual deliverable (the parser,
-the router, the scheduler, the graphical view, `main.py`,
-`performance.py`, the `Makefile`, this `README.md`, `requirements.txt`)
-lives directly at the root, alongside:
+```
+src/             every module that makes up the deliverable — the parser,
+                 the router, the scheduler, the graphical view, plus the
+                 `main.py` and `performance.py` entry points
+tests/           the pytest suite (see Testing below)
+assets/          sprites and fonts, loaded by a path relative to the
+                 working directory at runtime
+maps/            the subject's reference maps under
+                 maps/{easy,medium,hard,challenger}/ (read by
+                 `make performance`), plus custom edge-case and
+                 error-handling maps under maps/test/ and maps/bad_map/
+                 (the subject recommends adding your own, Chapter VII.4)
+pyproject.toml   project metadata, dependencies, and the flake8 / mypy /
+                 pytest configuration
+Makefile         the entry points listed under "Makefile targets"
+```
 
-- `assets/` — sprites and fonts, loaded by a relative path at runtime.
-- `maps/` — the subject's reference maps under
-  `maps/{easy,medium,hard,challenger}/` (read by `make performance`),
-  plus custom edge-case and error-handling maps under `maps/test/` and
-  `maps/bad_map/` (the subject explicitly recommends adding your own,
-  Chapter VII.4).
-- `testing/` — the `pytest` suite (with `pytest.ini` at the root). Not
-  graded (Chapter III.3), but kept in the repo; run it with
-  `python -m pytest`.
+The modules under `src/` import each other by bare name (e.g.
+`from constants import ...`). `pyproject.toml` puts `src/` on the import
+path — `tool.setuptools.package-dir` for `make install`, which does an
+editable install, and `tool.pytest.ini_options.pythonpath` for the test
+run — so no `src.` prefix is needed anywhere. `assets/` and `maps/` stay
+at the repository root because the code resolves them relative to the
+working directory, so every command is expected to run from the root.
 
-The only thing left out is the subject material itself
-(`en.subject.pdf`, `maps.tar.gz`, ...), kept under `dependences/`,
-which is `.gitignore`d and not submitted.
+The subject material itself (`en.subject.pdf`, `maps.tar.gz`, ...) is
+kept under `docs/`, which is `.gitignore`d and not submitted.
 
 ### Requirements
 
@@ -62,13 +70,13 @@ which is `.gitignore`d and not submitted.
 
 | Target | Effect |
 |---|---|
-| `make install` | Creates the virtual environment and installs dependencies. |
-| `make run` | Runs the simulator (`main.py`). |
+| `make install` | Creates the virtual environment and installs the project (editable) with its dependencies from `pyproject.toml`. |
+| `make run` | Runs the simulator (`src/main.py`). |
 | `make debug` | Runs the simulator under Python's built-in debugger (`pdb`). |
 | `make performance` | Solves every reference map under `maps/{easy,medium,hard,challenger}/` and reports achieved turns against the subject's own targets (see [Performance](#performance) below). |
-| `make lint` | Runs `flake8` and `mypy` (the subject's mandatory flag set). |
+| `make lint` | Runs `flake8` and `mypy` (the subject's mandatory flag set, kept in `pyproject.toml`) over `src/` and `tests/`. |
 | `make lint-strict` | Same, with `mypy --strict`. |
-| `make clean` | Removes `__pycache__` and `.mypy_cache`. |
+| `make clean` | Removes `__pycache__`, `.mypy_cache`, `.pytest_cache` and build artifacts. |
 | `make destroy` / `make re-install` | Tear down / rebuild the virtual environment. |
 
 ### Running a simulation
@@ -283,11 +291,11 @@ simulation ends after 5 turns.
 
 The project is covered by a `pytest` suite (unit tests for the parser,
 the router's pathfinding/planning, the turn scheduler, and the pure
-animation-timing helpers in the graphical view) under `testing/`,
-configured by `pytest.ini` at the repository root. As noted in the
-subject (Chapter III.3), test programs are not submitted or graded,
-but they're kept in the repo anyway. The suite reads its fixtures from
-`maps/`, so run it from the repository root with:
+animation-timing helpers in the graphical view) under `tests/`,
+configured by the `[tool.pytest.ini_options]` table in `pyproject.toml`.
+As noted in the subject (Chapter III.3), test programs are not submitted
+or graded, but they're kept in the repo anyway. The suite reads its
+fixtures from `maps/`, so run it from the repository root with:
 
 ```
 python -m pytest
@@ -307,7 +315,8 @@ python -m pytest
 throughout this project, always with the resulting code read, run
 (including the `pytest` suite and manual/headless `pygame` checks), and
 understood before being kept. Concretely, it helped with: iterating on
-the `pygame` graphical view, editing map sprite assets and  extending the
-`Makefile`.
+the `pygame` graphical view, editing map sprite assets, extending the
+`Makefile`, and reorganising the repository into a `src/` layout with a
+consolidated `pyproject.toml` (no source code changed in that move).
 Also drafting this `README.md`. Every change was verified against the
 existing test suite and `mypy --strict`/`flake8` before being accepted.
